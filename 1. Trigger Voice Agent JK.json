@@ -1,0 +1,192 @@
+{
+  "name": "1. Trigger Voice Agent JK",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "rQ7teCERv10tzIPT",
+          "mode": "list",
+          "cachedResultName": "Customer Numbers",
+          "cachedResultUrl": "/projects/k02zrYGkNKM2qled/datatables/rQ7teCERv10tzIPT"
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -208
+      ],
+      "id": "41337423-5033-4745-b4aa-fca45e360b93",
+      "name": "Get phone number"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/convai/twilio/outbound-call",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "sk_08e206584469a8a54bbfbb5f97495f5848df0f9f7d92dbf4"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"agent_id\": \"agent_4001kj6zsqhjf4h9m08zmnchbwyr\",\n  \"agent_phone_number_id\": \"phnum_4101kjd3ypr3fv3vs735kaxmxaj8\",\n  \"to_number\": \"{{ $json.phone }}\",\n  \"conversation_initiation_client_data\": {\n    \"dynamic_variables\": {\n      \"customer_name\": \"{{ $json.firstname }}\",\n      \"customer_phone\": \"{{ $json.phone }}\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        384,
+        -208
+      ],
+      "id": "e463e99b-ec33-4c67-93f7-edd62ebc6511",
+      "name": "Initiate outbound call"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/5 9-22 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -512,
+        -208
+      ],
+      "id": "7b13d07f-45b4-40ca-a419-6ccad83f5c17",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "de7d2f57-e31a-424f-9cff-87bf51154751",
+              "leftValue": "={{ $json.number_of_calls }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "54e765c5-65e5-4d73-8977-d330d48eedbe",
+              "leftValue": "={{ $json.updatedAt.toDateTime().plus(3, 'Hours') }}",
+              "rightValue": "={{ $now }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        -208
+      ],
+      "id": "377f0459-ccc7-43bd-87cc-c7f5e5100286",
+      "name": "Filter"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -208
+      ],
+      "id": "67a2c162-7422-4430-aae7-fb6c16c8c8ac",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get phone number": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initiate outbound call": {
+      "main": [
+        []
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get phone number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Initiate outbound call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "eb40395b-7d32-41c6-a1c1-47d94b900f1a",
+  "meta": {
+    "instanceId": "6b25c59c53d37a60133192c5501405898d0ce7bcd61633859ccfb72e2635c3fd"
+  },
+  "id": "xOPhWwnZpkKkImIt",
+  "tags": []
+}

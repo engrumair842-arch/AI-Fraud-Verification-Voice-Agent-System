@@ -1,0 +1,250 @@
+{
+  "name": "2. Voice Agent tool JK",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cutomer-response-details",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "f98e91b7-c563-44fb-92f5-f39e15a28073",
+      "name": "Webhook",
+      "webhookId": "154007e7-6d67-4015-8832-a04422d10c08"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "rQ7teCERv10tzIPT",
+          "mode": "list",
+          "cachedResultName": "Customer Numbers",
+          "cachedResultUrl": "/projects/k02zrYGkNKM2qled/datatables/rQ7teCERv10tzIPT"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "keyValue": "={{ $json.body.phone }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "5c751349-ec67-4fab-a1c0-88bf5af5b918",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1b645528-3038-436f-b566-acf5349ed58f",
+              "leftValue": "={{ $('Webhook').item.json.body.status }}",
+              "rightValue": "Approved No Fraud",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "94f23335-8871-4250-98df-ace9898985c8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $json.email }}",
+        "additionalFields": {
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "fraud_check",
+                "value": "Failed"
+              }
+            ]
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        80
+      ],
+      "id": "2ec33171-046f-43ce-877c-db8705c2abd9",
+      "name": "Confirmed Fraud",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "CcxlCYgN2FSucElZ",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $json.email }}",
+        "additionalFields": {
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "fraud_check",
+                "value": "Passed"
+              }
+            ]
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -112
+      ],
+      "id": "61c11414-e4d9-4369-90fa-0e01f1e83843",
+      "name": "Approved No Fraud",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "CcxlCYgN2FSucElZ",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "rQ7teCERv10tzIPT",
+          "mode": "list",
+          "cachedResultName": "Customer Numbers",
+          "cachedResultUrl": "/projects/k02zrYGkNKM2qled/datatables/rQ7teCERv10tzIPT"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "phone",
+              "keyValue": "={{ $('Webhook').item.json.body.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "96e338f6-de21-4660-9493-c3399a997423",
+      "name": "Delete row(s)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Approved No Fraud",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Confirmed Fraud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved No Fraud": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmed Fraud": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "967e31fd-c1cf-4384-8c1a-a1abcf3e7139",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b25c59c53d37a60133192c5501405898d0ce7bcd61633859ccfb72e2635c3fd"
+  },
+  "id": "fNUiULdrI3TzILfM",
+  "tags": []
+}

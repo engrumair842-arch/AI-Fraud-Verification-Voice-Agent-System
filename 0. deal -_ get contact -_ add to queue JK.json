@@ -1,0 +1,454 @@
+{
+  "name": "0. deal -> get contact -> add to queue JK",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "get-lead-data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        240
+      ],
+      "id": "a9163d0c-006b-42f7-a291-5fcd6f46dc28",
+      "name": "Webhook",
+      "webhookId": "04cdae76-e5bc-4eaa-b7fe-c61afaa195d0"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "deal",
+        "operation": "get",
+        "dealId": {
+          "__rl": true,
+          "value": "={{ $json.objectId }}",
+          "mode": "id"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        240
+      ],
+      "id": "da845f58-3573-467c-a0a1-5da286fc5726",
+      "name": "Get a deal",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "CcxlCYgN2FSucElZ",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        240
+      ],
+      "id": "b2500827-f541-426b-854a-28a791d201e8",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "operation": "get",
+        "contactId": {
+          "__rl": true,
+          "value": "={{ $json.contact_id }}",
+          "mode": "id"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        240
+      ],
+      "id": "3e803047-3f02-4dc2-ae66-d9c0fb2d199f",
+      "name": "Get a contact2",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "CcxlCYgN2FSucElZ",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c01cea21-57e5-4587-9f90-c3b6074af3af",
+              "leftValue": "={{ $json.contact_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        240
+      ],
+      "id": "2748b7a6-d9a7-4c8f-b457-1f3d22168a1b",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c74741e8-63dc-4469-a752-9f2786f116b4",
+              "leftValue": "={{ $json.phone }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        240
+      ],
+      "id": "42d17e34-2de5-412a-bb1b-72be28a5e54c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "rQ7teCERv10tzIPT",
+          "mode": "list",
+          "cachedResultName": "Customer Numbers",
+          "cachedResultUrl": "/projects/k02zrYGkNKM2qled/datatables/rQ7teCERv10tzIPT"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "number_of_calls": 0,
+            "phone": "={{ $json.phone }}",
+            "email": "={{ $json.email }}",
+            "firstname": "={{ $json.firstname }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "firstname",
+              "displayName": "firstname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "number_of_calls",
+              "displayName": "number_of_calls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        144
+      ],
+      "id": "cf24bee8-d261-46fe-9958-95137474ab80",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bfe917b7-ea3c-4456-98d7-794b6aae096a",
+              "name": "contact_id",
+              "value": "={{ $json.associations.associatedVids[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        240
+      ],
+      "id": "f2df191c-3cd1-4fcd-b1a5-414d41a8ab12",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d055b777-9e0e-44a8-80cc-d90256fc41fc",
+              "name": "phone",
+              "value": "={{ $json.properties.hs_calculated_phone_number.value }}",
+              "type": "string"
+            },
+            {
+              "id": "42844997-6544-426d-902a-21de0768e320",
+              "name": "email",
+              "value": "={{ $json.properties.email.value }}",
+              "type": "string"
+            },
+            {
+              "id": "866af64e-d2e6-4eb4-8d22-da481ec331bb",
+              "name": "firstname",
+              "value": "={{ $json.properties.firstname.value }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        240
+      ],
+      "id": "189dc62b-4182-47df-b90a-a5221417aad5",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        240
+      ],
+      "id": "bb195fc9-83a4-47c2-9708-42a34cdeff40",
+      "name": "Wait",
+      "webhookId": "34193071-b02c-4b1b-9595-a6e587cbe6c7"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $json.email }}",
+        "additionalFields": {
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "fraud_check",
+                "value": "Pending"
+              }
+            ]
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        336
+      ],
+      "id": "6f472a9a-a351-4e8d-bc11-fb562fc11b2f",
+      "name": "Pending Verification",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "CcxlCYgN2FSucElZ",
+          "name": "HubSpot account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a deal": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Get a contact2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get a contact2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pending Verification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get a deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94b8e38d-eec4-48b0-9f50-37d7dde10e10",
+  "meta": {
+    "instanceId": "6b25c59c53d37a60133192c5501405898d0ce7bcd61633859ccfb72e2635c3fd"
+  },
+  "id": "yb36wheQ79bPdJUj",
+  "tags": []
+}
